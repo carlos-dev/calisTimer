@@ -15,8 +15,8 @@ const App = () => (
         headerShown: false,
       }}
     >
-      <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="EMOM" component={EMOMScreen} />
+      <Stack.Screen name="Home" component={HomeScreen} />
     </Stack.Navigator>
   </NavigationContainer>
 );
