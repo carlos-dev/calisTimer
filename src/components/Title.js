@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const Title = ({ title, subtitle }) => (
-  <View style={styles.container}>
+const Title = ({ title, subtitle, style }) => (
+  <View style={[styles.container, style]}>
     <Text style={styles.title}>{title}</Text>
     <Text style={[styles.title, styles.subtitle]}>{subtitle}</Text>
   </View>
