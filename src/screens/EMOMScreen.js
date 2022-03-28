@@ -9,6 +9,9 @@ import Icon from '../utils/Icon';
 
 const EMOMScreen = () => {
   const [keyboardIsVisibile, setKeyboardIsVisibile] = useState(false);
+  const [alerts, setAlerts] = useState(0);
+  const [countdown, setCountdown] = useState(0);
+  const [time, setTime] = useState('15');
 
   useEffect(() => {
     Keyboard.addListener('keyboardDidShow', () => setKeyboardIsVisibile(true));
@@ -23,30 +26,30 @@ const EMOMScreen = () => {
   return (
     <KeyboardAvoidingView style={{ flex: 1, flexGrow: 1, backgroundColor: '#595' }}>
       <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
-        <Title title="EMOM" subtitle="Every minute on the minute" style={{ paddingTop: keyboardIsVisibile ? 20 : 150 }} />
+        <Title title="EMOM" subtitle="Every minute on the minute" style={{ paddingTop: keyboardIsVisibile ? 20 : 140 }} />
         <Icon type="fa" name="cog" size={50} color="#fff" style={[styles.icon, styles.iconCog]} />
         <Select
           label="Alertas:"
-          current={0}
+          current={alerts}
           options={[
             { id: 0, label: 'desligado' },
             { id: 15, label: '15s' },
             { id: 30, label: '30s' },
             { id: 45, label: '45s' },
           ]}
-          onSelect={(opt) => console.log(opt)}
+          onSelect={(opt) => setAlerts(opt)}
         />
         <Select
           label="Contagem regressiva:"
-          current={0}
+          current={countdown}
           options={[
             { id: 1, label: 'sim' },
             { id: 0, label: 'não' },
           ]}
-          onSelect={(opt) => console.log(opt)}
+          onSelect={(opt) => setCountdown(opt)}
         />
         <Text style={styles.text}>Quantos minutos:</Text>
-        <TextInput style={styles.input} value="15" keyboardType="numeric" />
+        <TextInput style={styles.input} value={time} keyboardType="numeric" onChangeText={(text) => setTime(text)} />
         <Text style={styles.text}>minutos</Text>
         <Icon type="fa" name="play" size={50} color="#fff" style={styles.icon} />
         <Text>Testar</Text>
