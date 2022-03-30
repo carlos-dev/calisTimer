@@ -1,27 +1,95 @@
 import React, { useEffect, useState } from 'react';
 import {
   StyleSheet, Text, TextInput, KeyboardAvoidingView, ScrollView,
-  Keyboard,
+  Keyboard, View, TouchableOpacity,
 } from 'react-native';
 import Select from '../components/Select';
+import Time from '../components/Time';
 import Title from '../components/Title';
 import Icon from '../utils/Icon';
 
 const EMOMScreen = () => {
   const [keyboardIsVisibile, setKeyboardIsVisibile] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
   const [alerts, setAlerts] = useState(0);
   const [countdown, setCountdown] = useState(0);
-  const [time, setTime] = useState('15');
+  const [count, setCount] = useState(0);
+  const [countdownValue, setCountdownValue] = useState(5);
+  const [time, setTime] = useState('2');
 
   useEffect(() => {
     Keyboard.addListener('keyboardDidShow', () => setKeyboardIsVisibile(true));
     Keyboard.addListener('keyboardDidHide', () => setKeyboardIsVisibile(false));
+    // handleStart();
 
     return () => {
       Keyboard.removeAllListeners('keyboardDidShow');
       Keyboard.removeAllListeners('keyboardDidHide');
     };
   }, []);
+
+  const incrementCount = () => {
+    const countTimer = setInterval(() => setCount((second) => {
+      if (second === (parseInt(time, 10) * 60) - 1) {
+        clearInterval(countTimer);
+      }
+      return second + 1;
+    }), 100);
+  };
+
+  const handleStart = () => {
+    setIsRunning(true);
+
+    const interval = setInterval(() => {
+      setCountdownValue((lastTimerCount) => {
+        if (countdown === 0 && lastTimerCount === 5) {
+          clearInterval(interval);
+          incrementCount();
+        } else if (lastTimerCount <= 1) {
+          clearInterval(interval);
+          incrementCount();
+        }
+
+        if (countdown > 0) {
+          return lastTimerCount - 1;
+        }
+
+        return lastTimerCount;
+      });
+    }, 1000); // each count lasts for a second
+      // cleanup the interval on complete
+    return () => clearInterval(interval);
+  };
+
+  if (isRunning) {
+    const percMinute = (count % 60) / 60;
+    const percTime = (count / 60) / parseInt(time, 10);
+    return (
+      <View style={[styles.container, { justifyContent: 'center' }]}>
+        <Text>
+          countdown:
+          {' '}
+          {countdownValue}
+        </Text>
+        <Text>
+          count:
+          {' '}
+          {count}
+        </Text>
+        <Time time={count} />
+        <Text>
+          minute:
+          {' '}
+          {percMinute}
+        </Text>
+        <Text>
+          Time:
+          {' '}
+          {percTime}
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, flexGrow: 1, backgroundColor: '#595' }}>
@@ -51,7 +119,9 @@ const EMOMScreen = () => {
         <Text style={styles.text}>Quantos minutos:</Text>
         <TextInput style={styles.input} value={time} keyboardType="numeric" onChangeText={(text) => setTime(text)} />
         <Text style={styles.text}>minutos</Text>
-        <Icon type="fa" name="play" size={50} color="#fff" style={styles.icon} />
+        <TouchableOpacity onPress={handleStart}>
+          <Icon type="fa" name="play" size={50} color="#fff" style={styles.icon} />
+        </TouchableOpacity>
         <Text>Testar</Text>
       </ScrollView>
     </KeyboardAvoidingView>
