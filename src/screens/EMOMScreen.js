@@ -3,6 +3,8 @@ import {
   StyleSheet, Text, TextInput, KeyboardAvoidingView, ScrollView,
   Keyboard, View, TouchableOpacity,
 } from 'react-native';
+import BackgroundProgress from '../components/BackgroundProgress';
+import ProgressBar from '../components/ProgressBar';
 import Select from '../components/Select';
 import Time from '../components/Time';
 import Title from '../components/Title';
@@ -37,17 +39,20 @@ const EMOMScreen = () => {
     }), 100);
   };
 
+  const resetTime = (interval) => {
+    clearInterval(interval);
+    incrementCount();
+  };
+
   const handleStart = () => {
     setIsRunning(true);
 
     const interval = setInterval(() => {
       setCountdownValue((lastTimerCount) => {
         if (countdown === 0 && lastTimerCount === 5) {
-          clearInterval(interval);
-          incrementCount();
+          resetTime(interval);
         } else if (lastTimerCount <= 1) {
-          clearInterval(interval);
-          incrementCount();
+          resetTime(interval);
         }
 
         if (countdown > 0) {
@@ -62,32 +67,36 @@ const EMOMScreen = () => {
   };
 
   if (isRunning) {
-    const percMinute = (count % 60) / 60;
-    const percTime = (count / 60) / parseInt(time, 10);
+    const percMinute = parseInt(((count % 60) / 60) * 100, 10);
+    const percTime = parseInt(((count / 60) / parseInt(time, 10)) * 100, 10);
     return (
-      <View style={[styles.container, { justifyContent: 'center' }]}>
-        <Text>
-          countdown:
-          {' '}
-          {countdownValue}
-        </Text>
-        <Text>
-          count:
-          {' '}
-          {count}
-        </Text>
-        <Time time={count} />
-        <Text>
-          minute:
-          {' '}
-          {percMinute}
-        </Text>
-        <Text>
-          Time:
-          {' '}
-          {percTime}
-        </Text>
-      </View>
+      <BackgroundProgress percentage={percMinute}>
+        <View style={[styles.container, { justifyContent: 'center' }]}>
+          <Text>
+            countdown:
+            {' '}
+            {countdownValue}
+          </Text>
+          <Text>
+            count:
+            {' '}
+            {count}
+          </Text>
+          <Time time={count} />
+          <ProgressBar percentage={percTime} />
+          <Time time={parseInt(time, 10) * 60 - count} type="appendedText" appendedText="restantes" />
+          <Text>
+            minute:
+            {' '}
+            {percMinute}
+          </Text>
+          <Text>
+            Time:
+            {' '}
+            {percTime}
+          </Text>
+        </View>
+      </BackgroundProgress>
     );
   }
 
@@ -130,7 +139,6 @@ const EMOMScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#d6304a',
     flex: 1,
   },
 
