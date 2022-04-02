@@ -12,11 +12,31 @@ const Select = ({
     setCurrent(props.current);
   }, []);
 
-  const handlePress = (opt) => () => {
-    setCurrent(opt);
+  useEffect(() => {
+    if (onSelect && Array.isArray(current)) {
+      onSelect(current);
+    }
+  }, [current]);
 
-    if (onSelect) {
-      onSelect(opt);
+  const checkItem = (item) => {
+    if (Array.isArray(current)) {
+      return current.indexOf(item) >= 0;
+    }
+    return current === item;
+  };
+
+  const handlePress = (opt) => () => {
+    if (Array.isArray(current)) {
+      if (current.indexOf(opt) >= 0) {
+        setCurrent(current.filter((item) => item !== opt));
+      } else {
+        setCurrent([...current, opt]);
+      }
+    } else {
+      setCurrent(opt);
+      if (onSelect) {
+        onSelect(opt);
+      }
     }
   };
 
@@ -24,15 +44,19 @@ const Select = ({
     <View>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.options}>
-        {options.map((opt) => (
-          <TouchableOpacity
-            key={opt.id}
-            onPress={handlePress(opt.id)}
-            style={[styles.button, opt.id === current ? styles.buttonSelected : null]}
-          >
-            <Text style={styles.option}>{opt.label}</Text>
-          </TouchableOpacity>
-        ))}
+        {options.map((opt) => {
+          checkItem(opt.id);
+
+          return (
+            <TouchableOpacity
+              key={opt.id}
+              onPress={handlePress(opt.id)}
+              style={[styles.button, checkItem(opt.id) ? styles.buttonSelected : null]}
+            >
+              <Text style={styles.option}>{opt.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );

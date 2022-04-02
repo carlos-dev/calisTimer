@@ -3,6 +3,8 @@ import {
   StyleSheet, Text, TextInput, KeyboardAvoidingView, ScrollView,
   Keyboard, View, TouchableOpacity,
 } from 'react-native';
+import Sound from 'react-native-sound';
+
 import BackgroundProgress from '../components/BackgroundProgress';
 import ProgressBar from '../components/ProgressBar';
 import Select from '../components/Select';
@@ -10,16 +12,20 @@ import Time from '../components/Time';
 import Title from '../components/Title';
 import Icon from '../utils/Icon';
 
+let alert = require('../assets/sounds/beep.mp3');
+
 const EMOMScreen = () => {
   const [keyboardIsVisibile, setKeyboardIsVisibile] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const [alerts, setAlerts] = useState(0);
+  const [alerts, setAlerts] = useState([0]);
   const [countdown, setCountdown] = useState(0);
   const [count, setCount] = useState(0);
   const [countdownValue, setCountdownValue] = useState(5);
   const [time, setTime] = useState('2');
 
   useEffect(() => {
+    Sound.setCategory('Playback', true);
+    alert = new Sound(alert);
     Keyboard.addListener('keyboardDidShow', () => setKeyboardIsVisibile(true));
     Keyboard.addListener('keyboardDidHide', () => setKeyboardIsVisibile(false));
     // handleStart();
@@ -30,13 +36,29 @@ const EMOMScreen = () => {
     };
   }, []);
 
+  const shouldAlert = (second) => {
+    const rest = second % 60;
+
+    if (alerts.indexOf(rest) >= 0) {
+      alert.play();
+    }
+
+    if (countdown === 1) {
+      if (rest >= 55 && rest <= 60) {
+        alert.play();
+      }
+    }
+  };
+
   const incrementCount = () => {
     const countTimer = setInterval(() => setCount((second) => {
+      shouldAlert(second);
+
       if (second === (parseInt(time, 10) * 60) - 1) {
         clearInterval(countTimer);
       }
       return second + 1;
-    }), 100);
+    }), 1000);
   };
 
   const resetTime = (interval) => {
@@ -56,6 +78,7 @@ const EMOMScreen = () => {
         }
 
         if (countdown > 0) {
+          alert.play();
           return lastTimerCount - 1;
         }
 
@@ -69,6 +92,7 @@ const EMOMScreen = () => {
   if (isRunning) {
     const percMinute = parseInt(((count % 60) / 60) * 100, 10);
     const percTime = parseInt(((count / 60) / parseInt(time, 10)) * 100, 10);
+
     return (
       <BackgroundProgress percentage={percMinute}>
         <View style={[styles.container, { justifyContent: 'center' }]}>
@@ -109,7 +133,7 @@ const EMOMScreen = () => {
           label="Alertas:"
           current={alerts}
           options={[
-            { id: 0, label: 'desligado' },
+            { id: 0, label: '0s' },
             { id: 15, label: '15s' },
             { id: 30, label: '30s' },
             { id: 45, label: '45s' },
