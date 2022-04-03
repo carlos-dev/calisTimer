@@ -1,17 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Animated } from 'react-native';
 
-const usePrevious = (value) => {
-  const ref = useRef();
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref.current;
-};
+import useComponentDidUpdate from '../hooks/useComponentDidUpdate';
 
 const ProgressBar = ({ color, percentage, height }) => {
   const [animation] = useState(new Animated.Value(0));
-  const prevCount = usePrevious(percentage);
+  const prevCount = useComponentDidUpdate(percentage);
 
   useEffect(() => {
     // this one is your didupdate method for count variable

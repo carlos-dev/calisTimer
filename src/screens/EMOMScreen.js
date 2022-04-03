@@ -23,6 +23,9 @@ const EMOMScreen = () => {
   const [countdownValue, setCountdownValue] = useState(5);
   const [time, setTime] = useState('2');
 
+  const [intervalCountTimer, setIntervalCountTimer] = useState(null);
+  const [intervalCountdownTimer, setIntervalCountdownTimer] = useState(null);
+
   useEffect(() => {
     Sound.setCategory('Playback', true);
     alert = new Sound(alert);
@@ -53,6 +56,7 @@ const EMOMScreen = () => {
   const incrementCount = () => {
     const countTimer = setInterval(() => setCount((second) => {
       shouldAlert(second);
+      setIntervalCountTimer(countTimer);
 
       if (second === (parseInt(time, 10) * 60) - 1) {
         clearInterval(countTimer);
@@ -71,6 +75,7 @@ const EMOMScreen = () => {
 
     const interval = setInterval(() => {
       setCountdownValue((lastTimerCount) => {
+        setIntervalCountdownTimer(interval);
         if (countdown === 0 && lastTimerCount === 5) {
           resetTime(interval);
         } else if (lastTimerCount <= 1) {
@@ -89,36 +94,40 @@ const EMOMScreen = () => {
     return () => clearInterval(interval);
   };
 
+  const handleStop = () => {
+    clearInterval(intervalCountTimer);
+    clearInterval(intervalCountdownTimer);
+
+    setIsRunning(false);
+    setCount(0);
+    setCountdown(0);
+    setCountdownValue(5);
+  };
+
   if (isRunning) {
-    const percMinute = parseInt(((count % 60) / 60) * 100, 10);
+    // const percMinute = parseInt(((count % 60) / 60) * 100, 10);
     const percTime = parseInt(((count / 60) / parseInt(time, 10)) * 100, 10);
 
     return (
-      <BackgroundProgress percentage={percMinute}>
+      <BackgroundProgress percentage={percTime}>
         <View style={[styles.container, { justifyContent: 'center' }]}>
-          <Text>
-            countdown:
-            {' '}
-            {countdownValue}
-          </Text>
-          <Text>
-            count:
-            {' '}
-            {count}
-          </Text>
-          <Time time={count} />
-          <ProgressBar percentage={percTime} />
-          <Time time={parseInt(time, 10) * 60 - count} type="appendedText" appendedText="restantes" />
-          <Text>
-            minute:
-            {' '}
-            {percMinute}
-          </Text>
-          <Text>
-            Time:
-            {' '}
-            {percTime}
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Title title="EMOM" subtitle="Every minute on the minute" style={{ paddingTop: 100 }} />
+          </View>
+
+          <View style={{ flex: 1, justifyContent: 'center' }}>
+            <Time time={count} />
+            <ProgressBar percentage={percTime} />
+            <Time time={parseInt(time, 10) * 60 - count} type="appendedText" appendedText="restantes" />
+          </View>
+
+          <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+            {countdownValue > 0 && countdown === 1 && <Text style={styles.countdown}>{countdownValue}</Text>}
+
+            <TouchableOpacity onPress={handleStop} style={{ paddingBottom: 40 }}>
+              <Icon type="fa" name="stop" size={50} color="#fff" style={styles.icon} />
+            </TouchableOpacity>
+          </View>
         </View>
       </BackgroundProgress>
     );
@@ -186,6 +195,13 @@ const styles = StyleSheet.create({
     color: '#000',
     fontFamily: 'Ubuntu-Regular',
     fontSize: 48,
+  },
+
+  countdown: {
+    fontFamily: 'Ubuntu-Bold',
+    fontSize: 134,
+    color: '#fff',
+    textAlign: 'center',
   },
 });
 
